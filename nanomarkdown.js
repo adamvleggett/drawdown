@@ -46,7 +46,7 @@
 
     // code
     .replace(/\n((```|~~~).*\n?((.|\n)*?)\2|((    .*?\n)+))/g, function(p0, p1, p2, p3, p4, p5) {
-        store.push("<code>" + (p3||p5).replace(/^    /gm, "") + "</code>");
+        store.push("<code>" + (p3||p5.replace(/^    /gm, "")) + "</code>");
         return "<" + (store.length-1) + ">";
     })
 
