@@ -1,0 +1,17 @@
+/**
+ * nanomarkdown.css
+ * (c) Adam Leggett
+ */
+
+
+.markdown,
+.markdown li,
+.markdown code,
+.markdown p {
+    margin: 8px 0;
+}
+.markdown code {
+    display: block;
+    padding: 0 4em;
+    white-space: pre-wrap;
+}
