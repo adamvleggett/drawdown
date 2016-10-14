@@ -16,67 +16,62 @@
     var stash = [];
     var si = 0;
 
-    return highlight(("\n" + src
+    return highlight(("\n" + src + "\n")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/\t/g, "  ")
-        .replace(/\r/g, "") + "\n\n")
+        .replace(/\r/g, "")
+
+    // horizontal rule
+    .replace(/^([*\-=_] *){3,}$/gm, "<hr/>")
 
     // list
-    .replace(/^((\s*)([*\-+]|[\da-zA-Z][.)])( .*)?\n)+/gm, function(all, p1, p2) {
-        var rep = "";
+    .replace(/^( *)([*\-+]|[\da-zA-Z][.)]) [^]*?\n$/gm, function(all, base) {
         var close = [];
-        var stat = -1;
-        all.replace(/^(\s*)(([*\-+])|(\d[.)])|([a-z][.)])|([A-Z][.)]))( .*|)/gm, function(all, l1, l2, l3, l4, l5, l6, l7) {
-            var nstat = l1.length - p2.length >> 1;
-            while (stat > nstat) {
-                rep += close.pop();
-                stat--;
-            }
-            while (stat < nstat) {
-                rep += l3
-                    ? "<ul>"
-                    : "<ol" + (l4
-                        ? ">"
-                        : " style='list-style-type:" + (l6
-                            ? "upper-alpha'>"
-                            : "lower-alpha'>"));
-                close.push(l3 ? "</ul>" : "</ol>");
-                stat++;
-            }
-            rep += "<li>" + l7 + "</li>";
-            return "";
-        });
-        return "\n" + rep + close.join("") + "\n";
+        return all.replace(/^( *)(([*\-+])|(\d[.)])|([a-z][.)])|[A-Z][.)])( .*|)/gm,
+            function(all, indent, _, ul, ol, low, content) {
+                var rep = "";
+                var depth = Math.max(0, indent.length - base.length >> 1) + 1;
+                while (close.length > depth) {
+                    rep += close.pop();
+                }
+                while (close.length < depth) {
+                    rep += ul
+                        ? "<ul>"
+                        : "<ol" + (ol
+                            ? ">"
+                            : " style='list-style-type:" + (low ? "low" : "upp") + "er-alpha'>");
+                    close.push(ul ? "</ul>" : "</ol>");
+                }
+                return rep + "<li>" + content + "</li>";
+            }) + close.join("");
     })
 
     // code
-    .replace(/\n((```|~~~).*\n?((.|\n)*?)\2|((    .*?\n)+))/g, function(all, p1, p2, p3, p4, p5) {
-        stash.push("<code>" + (p3||p5.replace(/^    /gm, "")) + "</code>");
-        return "<" + (si++) + ">";
+    .replace(/\n((```|~~~).*\n?([^]*?)\2|((    .*?\n)+))/g, function(all, p1, p2, p3, p4) {
+        stash[si] = "<code>" + (p3||p4.replace(/^    /gm, "")) + "</code>";
+        return "\r" + (si++) + " ";
     })
 
     // link
-    .replace(/!?\[([^\]<>]+)\]\(([^ \)<>]+)( "[^\(\)\"]+")?\)/g, function(all, p1, p2) {
-        stash.push(/^!/.test(all)
-            ? "<img src='" + p2 + "' alt='" + p1 + "'/>"
-            : p1.link(p2));
-        return "<" + (si++) + ">";
+    .replace(/(!?)\[(.*?)\]\((.*?)( ".*")?\)/g, function(all, p1, p2, p3) {
+        stash[si] = p1
+            ? "<img src='" + p3 + "' alt='" + p2 + "'/>"
+            : p2.link(p3);
+        return "\r" + (si++) + " ";
     })
 
     // heading
     .replace(/^(#{1,6}) (.*?)( \1)?\s*$/gm, function(all, p1, p2) {
-        var cnt = p1.length;
-        return "\n\n<h" + cnt + ">" + p2 + "</h" + cnt + ">\n";
+        var tag = p1.length + ">";
+        return "<h" + tag + p2 + "</h" + tag;
     })
 
-    // horizontal rule
-    .replace(/^(?:([*\-=_] ?)+)\1\1\s*$/gm, "\n<hr/>\n"))
+    // paragraph
+    .replace(/(?=^|>|\n)\n+([^<]+?)\n+(?=\n|<|$)/g, "<p>$1</p>\n"))
 
     // stash
-    .replace(/<(\d+)>/g, function(all, index) {
+    .replace(/\r(\d+) /g, function(all, index) {
         return stash[index];
-    })
-
-    .replace(/((.|\n)*?)\n\s*\n/g, "<p>$1</p>");
+    });
 };

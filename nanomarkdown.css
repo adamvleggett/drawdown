@@ -10,6 +10,12 @@
 .markdown p {
     margin: 8px 0;
 }
+.markdown p:first-child {
+    margin-top: 0;
+}
+.markdown p:last-child {
+    margin-bottom: 0;
+}
 .markdown code {
     display: block;
     padding: 0 4em;
