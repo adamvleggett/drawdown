@@ -10,10 +10,15 @@
         src = src.replace(rex, fn);
     }
 
-    function highlight(src, done) {
-        return src.replace(/((\*\*?|__?)|~~)(\S(.*\S)??)\1(?!\1)/g, function(all, p1, p2, p3) {
-            var tag = "sib".charAt(p2 ? p2.length : 0) + ">";
-            return "<" + tag + (done ? p3 : highlight(p3,1)) + "</" + tag;
+    function highlight(src) {
+        return src.replace(/\B([*_~`])(\1?)([^<]*?)\1\2(?!\1)\B/g, function(all, p1, p2, content) {
+            var tag = {
+                "*": "bi",
+                "_": "bi",
+                "~": ["s","sub"],
+                "`": ["code","code"]
+            } [p1][~~!p2] + ">";
+            return "<" + tag + highlight(content) + "</" + tag;
         });
     }
 
