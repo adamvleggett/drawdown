@@ -31,9 +31,9 @@
     replace(/^([*\-=_] *){3,}$/gm, "<hr/>");
 
     // list
-    replace(/^( *)([*\-+]|[\da-zA-Z]+[.)]) [^]*?\n$/gm, function(all, base) {
+    replace(/^( *)([*\-+]|(\d+|[a-zA-Z])[.)]) [^]*?\n$/gm, function(all, base) {
         var close = [];
-        return all.replace(/^( *)([*\-+]|((\d+)|([a-z]+)|[A-Z]+)[.)]) (.*|)/gm,
+        return all.replace(/^( *)([*\-+]|((\d+)|([a-z])|[A-Z])[.)]) (.*|)/gm,
             function(all, indent, _, ol, num, low, content) {
                 var rep = "";
                 var depth = Math.max(0, indent.length - base.length >> 1) + 1;
@@ -44,7 +44,7 @@
                     rep += ol
                         ? "<ol start='" + (num
                             ? ol + "'>"
-                            : (parseInt(ol[0],36)-9) + "' style='list-style-type:" + (low ? "low" : "upp") + "er-alpha'>")
+                            : (parseInt(ol,36)-9) + "' style='list-style-type:" + (low ? "low" : "upp") + "er-alpha'>")
                         : "<ul>";
                     close.push(ol ? "</ol>" : "</ul>");
                 }
