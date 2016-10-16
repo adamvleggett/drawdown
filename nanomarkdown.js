@@ -10,16 +10,24 @@
         src = src.replace(rex, fn);
     }
 
-    function highlight(src) {
-        return src.replace(/\B([*_~`])(\1?)([^<]*?)\1\2(?!\1)\B/g, function(all, p1, p2, content) {
-            var tag = {
-                "*": "bi",
-                "_": "bi",
-                "~": ["s","sub"],
-                "`": ["code","code"]
-            } [p1][~~!p2] + ">";
-            return "<" + tag + highlight(content) + "</" + tag;
+    function element(tag, content) {
+        return "<" + tag + ">" + content + "</" + tag + ">";
+    }
+
+    function blockquote(src) {
+        return src.replace(/\n *&gt; *([^]*?)(?=(\n|$){2})/g, function(all, content) {
+            return element("blockquote", blockquote(content.replace(/^ *&gt; */gm,"")));
         });
+    }
+
+    function highlight(src) {
+        return src.replace(/(^|\W|_)(([*_])|(~)|`)(\2?)([^<]*?)\2\5(?!\2)(?=\W|_|$)/g,
+            function(all, _, p1, bi, ss, p2, content) {
+                return element(
+                      bi ? (p2 ? "b" : "i")
+                    : ss ? (p2 ? "s" : "sub") : "code",
+                    highlight(content));
+            });
     }
 
     var stash = [];
@@ -31,6 +39,8 @@
     replace(/>/g, "&gt;");
     replace(/\t/g, "  ");
     replace(/\r/g, "");
+
+    src = blockquote(src);
 
     // horizontal rule
     replace(/^([*\-=_] *){3,}$/gm, "<hr/>");
@@ -53,13 +63,13 @@
                         : "<ul>";
                     close.push(ol ? "</ol>" : "</ul>");
                 }
-                return rep + "<li>" + content + "</li>";
+                return rep + element("li", content);
             }) + close.join("");
     });
 
     // code
     replace(/\n((```|~~~).*\n?([^]*?)\2|((    .*?\n)+))/g, function(all, p1, p2, p3, p4) {
-        stash[si] = "<pre><code>" + (p3||p4.replace(/^    /gm, "")) + "</code></pre>";
+        stash[si] = element("pre", element("code", p3||p4.replace(/^    /gm, "")));
         return "\r" + (si++) + " ";
     });
 
@@ -74,9 +84,8 @@
     });
 
     // heading
-    replace(/^(#{1,6}) (.*?)( #*)? *$/gm, function(all, p1, p2) {
-        var tag = p1.length + ">";
-        return "<h" + tag + p2 + "</h" + tag;
+    replace(/(?=^|>|\n)([>\s]*?)(#{1,6}) (.*?)( #*)? *(?=\n|$)/g, function(all, _, p1, p2) {
+        return _ + element("h" + p1.length, p2);
     });
 
     // paragraph
