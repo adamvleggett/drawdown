@@ -1,8 +1,10 @@
 # nanomarkdown
+
 Tiny but reliable Markdown to HTML conversion in JavaScript
 
 Supported Markdown features:
 
+- Block quotes
 - Code blocks
 - Links
 - Images
@@ -11,14 +13,19 @@ Supported Markdown features:
 - Bold
 - Italic
 - Strikethrough
+- Monospace
+- Subscript
 - Horizontal rule
 
 Unsupported Markdown features at this time:
 
 - Tables
-- Block quotes
 - Line blocks
 - Definition lists
 - Footnotes
 - Twitter/Facebook/YouTube embed
 - Inline math equations
+
+To use:
+
+    element.innerHTML = markdown(text);
