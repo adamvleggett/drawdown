@@ -1,5 +1,5 @@
 /**
- * nanomarkdown.js
+ * drawdown.js
  * (c) Adam Leggett
  */
 
@@ -24,15 +24,16 @@
     function list(src) {
         return src.replace(/\n( *)([*\-+]|((\d+)|([a-z])|[A-Z])[.)]) +([^]*?)(?=(\n|$){2})/g,
         function(all, ind, _, ol, num, low, content) {
+            var rind = "\n {0," + (ind.length+1) + "}";
             var entry = content.split(
-                RegExp("\n ?" + ind + "(?:(?:\\d+|[a-zA-Z])[.)]|[*\\-+]) +", "g")).map(list);
+                RegExp(rind + "(?:(?:\\d+|[a-zA-Z])[.)]|[*\\-+]) +", "g")).map(list);
 
             return (ol
                 ? "<ol start='" + (num
                     ? ol + "'>"
                     : (parseInt(ol,36)-9) + "' style='list-style-type:" + (low ? "low" : "upp") + "er-alpha'>")
                 : "<ul>")
-                + element("li", highlight(entry.join("</li><li>")))
+                + element("li", highlight(entry.join("</li>\n<li>").replace(RegExp(rind,"g"),"\n")))
                 + (ol ? "</ol>" : "</ul>");
         });
     }
@@ -40,10 +41,10 @@
     function highlight(src) {
         return src.replace(/(^|\W|_)(([*_])|(~)|`)(\2?)([^<]*?)\2\5(?!\2)(?=\W|_|$)/g,
         function(all, _, p1, bi, ss, p2, content) {
-            return element(
+            return _ + element(
                     bi ? (p2 ? "b" : "i")
                   : ss ? (p2 ? "s" : "sub") : "code",
-                highlight(_ + content));
+                highlight(content));
         });
     }
 
@@ -56,11 +57,14 @@
     replace(/>/g, "&gt;");
     replace(/\t|\r/g, "  ");
 
+    // blockquote
     src = blockquote(src);
-    src = list(src);
 
     // horizontal rule
     replace(/^([*\-=_] *){3,}$/gm, "<hr/>");
+
+    // list
+    src = list(src);
 
     // code
     replace(/\n((```|~~~).*\n?([^]*?)\2|((    .*?\n)+))/g, function(all, p1, p2, p3, p4) {
