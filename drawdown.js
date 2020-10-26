@@ -65,7 +65,9 @@
         });
     }
 
-    const unesc = str => str.replace(rx_escape, '$1');
+    function unesc(str) {
+        return str.replace(rx_escape, '$1');
+    }
 
     var stash = [];
     var si = 0;
@@ -103,24 +105,25 @@
     });
 
     // table
-    replace(rx_table, (all, table) => {
-        const sep = table.match(rx_thead)[1];
+    replace(rx_table, function(all, table) {
+        var sep = table.match(rx_thead)[1];
         return '\n' + element('table',
-            table.replace(rx_row, (row, ri) =>
-                row == sep ? '' : element('tr', row.replace(rx_cell, (all, cell, ci) =>
-                    ci ? element(sep && !ri ? 'th' : 'td', unesc(highlight(cell || ''))) : ''))
-            )
+            table.replace(rx_row, function(row, ri) {
+                return row == sep ? '' : element('tr', row.replace(rx_cell, function(all, cell, ci) {
+                    return ci ? element(sep && !ri ? 'th' : 'td', unesc(highlight(cell || ''))) : ''
+                }))
+            })
         )
     });
 
     // heading
-    replace(rx_heading, (all, _, p1, p2) => _ + element('h' + p1.length, unesc(highlight(p2))));
+    replace(rx_heading, function(all, _, p1, p2) { return _ + element('h' + p1.length, unesc(highlight(p2))) });
 
     // paragraph
-    replace(rx_para, (all, content) => element('p', unesc(highlight(content))));
+    replace(rx_para, function(all, content) { return element('p', unesc(highlight(content))) });
 
     // stash
-    replace(rx_stash, all => stash[parseInt(all)]);
+    replace(rx_stash, function(all) { return stash[parseInt(all)] });
 
     return src.trim();
 };
