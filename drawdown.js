@@ -22,7 +22,7 @@
     var rx_row = /.*\n/g;
     var rx_cell = /\||(.*?[^\\])\|/g;
     var rx_heading = /(?=^|>|\n)([>\s]*?)(#{1,6}) (.*?)( #*)? *(?=\n|$)/g;
-    var rx_para = /(?=^|>|\n)\n+([^<]+?)\n+(?=\n|<|$)/g;
+    var rx_para = /(?=^|>|\n)\s*\n+([^<]+?)\n+\s*(?=\n|<|$)/g;
     var rx_stash = /-\d+\uf8ff/g;
 
     function replace(rex, fn) {
