@@ -96,11 +96,11 @@
 
     // link or image
     replace(rx_link, function(all, p1, p2, p3, p4, p5, p6) {
-        stash[--si] = p4
-            ? p2
+        stash[--si] = p6 ? p6 : p2
+            ? p4
                 ? '<img src="' + p4 + '" alt="' + p3 + '"/>'
-                : '<a href="' + p4 + '">' + unesc(highlight(p3)) + '</a>'
-            : p6;
+                : p1
+            : '<a href="' + p4 + '">' + unesc(highlight(p3)) + '</a>';
         return si + '\uf8ff';
     });
 
